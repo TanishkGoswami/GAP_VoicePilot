@@ -264,7 +264,7 @@ export default async function AssistantDetailPage({ params }: AssistantPageProps
         id: t.id || t._id,
         name: t.name || t.tool_name || "Custom Connector",
         type: t.type || (t.schema ? "api_request" : "knowledgebase"),
-        description: t.description || (t.schema ? "Vomyra API Request Connector" : "Vomyra Knowledge Base Tool"),
+        description: t.description || (t.schema ? "VoicePilot API Request Connector" : "VoicePilot Knowledge Base Tool"),
         config: {
           request_url: t.schema?.endpoint || t.endpoint || "",
           request_http_method: t.schema?.method || t.method || "POST"

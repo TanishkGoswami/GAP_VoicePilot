@@ -40,7 +40,7 @@ export function EditAssistantForm({ assistant, workspaceTools = [] }: EditAssist
 
   const initialCfg = assistant.config_snapshot || {};
   const initialTransfer = initialCfg.transfer_call_settings || {};
-  
+
   // Model state
   const [name, setName] = React.useState(assistant.name || initialCfg.name || "Untitled Assistant");
   const [aiProvider, setAiProvider] = React.useState(initialCfg.ai_provider || "openai");
@@ -252,7 +252,7 @@ export function EditAssistantForm({ assistant, workspaceTools = [] }: EditAssist
       category: existing?.category || defaults.category,
       enabled: existing?.enabled !== false,
       when_to_use: existing?.when_to_use || defaults.when_to_use,
-      requires_confirmation: existing?.requires_confirmation !== undefined 
+      requires_confirmation: existing?.requires_confirmation !== undefined
         ? (defaults.category !== 'READ' ? true : existing.requires_confirmation)
         : defaults.requires_confirmation,
       timeout_ms: existing?.timeout_ms || defaults.timeout_ms,
@@ -320,18 +320,18 @@ export function EditAssistantForm({ assistant, workspaceTools = [] }: EditAssist
   const handlePreviewVoice = (e: React.MouseEvent, language: string) => {
     e.preventDefault();
     if (typeof window === 'undefined' || !window.speechSynthesis) return;
-    
+
     window.speechSynthesis.cancel();
     const msg = new SpeechSynthesisUtterance();
     msg.text = language.includes('hi') ? "नमस्ते, मैं आपकी वॉइस असिस्टेंट हूँ।" : "Hello, I am your voice assistant.";
     msg.lang = language;
-    
+
     const voices = window.speechSynthesis.getVoices();
     const match = voices.find(v => v.lang.includes(language.substring(0, 2)));
     if (match) {
       msg.voice = match;
     }
-    
+
     window.speechSynthesis.speak(msg);
   };
 
@@ -436,7 +436,7 @@ export function EditAssistantForm({ assistant, workspaceTools = [] }: EditAssist
             </span>
             {assistant.provider_resource_id && (
               <span className="font-mono text-[10px] bg-surface-soft border border-hairline text-neutral-500 px-2 py-0.5 rounded">
-                Vomyra: {assistant.provider_resource_id.slice(-6)}
+                Resource ID: {assistant.provider_resource_id.slice(-6)}
               </span>
             )}
           </div>
@@ -468,9 +468,8 @@ export function EditAssistantForm({ assistant, workspaceTools = [] }: EditAssist
         <button
           type="button"
           onClick={() => setActiveTab("model")}
-          className={`flex-1 py-2 px-3 rounded-[8px] font-semibold flex items-center justify-center gap-1.5 transition-all ${
-            activeTab === "model" ? "bg-white text-black shadow-xs font-bold" : "text-neutral-500 hover:text-black"
-          }`}
+          className={`flex-1 py-2 px-3 rounded-[8px] font-semibold flex items-center justify-center gap-1.5 transition-all ${activeTab === "model" ? "bg-white text-black shadow-xs font-bold" : "text-neutral-500 hover:text-black"
+            }`}
         >
           <Bot className="w-3.5 h-3.5" />
           <span>Model & Prompts</span>
@@ -479,9 +478,8 @@ export function EditAssistantForm({ assistant, workspaceTools = [] }: EditAssist
         <button
           type="button"
           onClick={() => setActiveTab("speech")}
-          className={`flex-1 py-2 px-3 rounded-[8px] font-semibold flex items-center justify-center gap-1.5 transition-all ${
-            activeTab === "speech" ? "bg-white text-black shadow-xs font-bold" : "text-neutral-500 hover:text-black"
-          }`}
+          className={`flex-1 py-2 px-3 rounded-[8px] font-semibold flex items-center justify-center gap-1.5 transition-all ${activeTab === "speech" ? "bg-white text-black shadow-xs font-bold" : "text-neutral-500 hover:text-black"
+            }`}
         >
           <Cpu className="w-3.5 h-3.5" />
           <span>Speech Input (STT)</span>
@@ -490,9 +488,8 @@ export function EditAssistantForm({ assistant, workspaceTools = [] }: EditAssist
         <button
           type="button"
           onClick={() => setActiveTab("voice")}
-          className={`flex-1 py-2 px-3 rounded-[8px] font-semibold flex items-center justify-center gap-1.5 transition-all ${
-            activeTab === "voice" ? "bg-white text-black shadow-xs font-bold" : "text-neutral-500 hover:text-black"
-          }`}
+          className={`flex-1 py-2 px-3 rounded-[8px] font-semibold flex items-center justify-center gap-1.5 transition-all ${activeTab === "voice" ? "bg-white text-black shadow-xs font-bold" : "text-neutral-500 hover:text-black"
+            }`}
         >
           <Mic className="w-3.5 h-3.5" />
           <span>Voice Output (TTS)</span>
@@ -501,9 +498,8 @@ export function EditAssistantForm({ assistant, workspaceTools = [] }: EditAssist
         <button
           type="button"
           onClick={() => setActiveTab("tools")}
-          className={`flex-1 py-2 px-3 rounded-[8px] font-semibold flex items-center justify-center gap-1.5 transition-all ${
-            activeTab === "tools" ? "bg-white text-black shadow-xs font-bold" : "text-neutral-500 hover:text-black"
-          }`}
+          className={`flex-1 py-2 px-3 rounded-[8px] font-semibold flex items-center justify-center gap-1.5 transition-all ${activeTab === "tools" ? "bg-white text-black shadow-xs font-bold" : "text-neutral-500 hover:text-black"
+            }`}
         >
           <Wrench className="w-3.5 h-3.5" />
           <span>Tools ({assignedToolIds.length})</span>
@@ -512,9 +508,8 @@ export function EditAssistantForm({ assistant, workspaceTools = [] }: EditAssist
         <button
           type="button"
           onClick={() => setActiveTab("integrations")}
-          className={`flex-1 py-2 px-3 rounded-[8px] font-semibold flex items-center justify-center gap-1.5 transition-all ${
-            activeTab === "integrations" ? "bg-white text-black shadow-xs font-bold" : "text-neutral-500 hover:text-black"
-          }`}
+          className={`flex-1 py-2 px-3 rounded-[8px] font-semibold flex items-center justify-center gap-1.5 transition-all ${activeTab === "integrations" ? "bg-white text-black shadow-xs font-bold" : "text-neutral-500 hover:text-black"
+            }`}
         >
           <Share2 className="w-3.5 h-3.5" />
           <span>Integrations & Permissions</span>
@@ -523,9 +518,8 @@ export function EditAssistantForm({ assistant, workspaceTools = [] }: EditAssist
         <button
           type="button"
           onClick={() => setActiveTab("advance")}
-          className={`flex-1 py-2 px-3 rounded-[8px] font-semibold flex items-center justify-center gap-1.5 transition-all ${
-            activeTab === "advance" ? "bg-white text-black shadow-xs font-bold" : "text-neutral-500 hover:text-black"
-          }`}
+          className={`flex-1 py-2 px-3 rounded-[8px] font-semibold flex items-center justify-center gap-1.5 transition-all ${activeTab === "advance" ? "bg-white text-black shadow-xs font-bold" : "text-neutral-500 hover:text-black"
+            }`}
         >
           <Settings2 className="w-3.5 h-3.5" />
           <span>Advance Settings</span>
@@ -861,9 +855,9 @@ export function EditAssistantForm({ assistant, workspaceTools = [] }: EditAssist
           {/* Featured Voices Cards */}
           <div className="pt-6">
             <h3 className="text-xl font-bold text-black mb-4">Featured Voices</h3>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              
+
               {/* Card 1: Aarti Hindi */}
               <div className="bg-surface-soft/40 rounded-[12px] p-5 flex flex-col justify-between border border-hairline hover:border-emerald-500/50 transition-colors cursor-pointer group">
                 <div>
@@ -874,12 +868,12 @@ export function EditAssistantForm({ assistant, workspaceTools = [] }: EditAssist
                     </div>
                   </div>
                   <p className="text-[11px] font-mono text-neutral-500 mt-1">hi-IN-AartiNeural</p>
-                  
+
                   <div className="flex flex-wrap gap-2 mt-3">
                     <span className="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full text-[10px] font-bold">Azure</span>
                     <span className="bg-neutral-200 text-neutral-700 px-2 py-0.5 rounded-full text-[10px] font-bold">Hindi</span>
                   </div>
-                  
+
                   {voiceName === "hi-IN-AartiNeural" && (
                     <div className="mt-3 bg-black text-white px-3 py-1 rounded-full w-fit text-[10px] font-bold">
                       Selected
@@ -921,7 +915,7 @@ export function EditAssistantForm({ assistant, workspaceTools = [] }: EditAssist
                     </div>
                   </div>
                   <p className="text-[11px] font-mono text-neutral-500 mt-1">hi-IN-ArjunNeural</p>
-                  
+
                   <div className="flex flex-wrap gap-2 mt-3">
                     <span className="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full text-[10px] font-bold">Azure</span>
                     <span className="bg-neutral-200 text-neutral-700 px-2 py-0.5 rounded-full text-[10px] font-bold">Hindi</span>
@@ -969,7 +963,7 @@ export function EditAssistantForm({ assistant, workspaceTools = [] }: EditAssist
                     </div>
                   </div>
                   <p className="text-[11px] font-mono text-neutral-500 mt-1">en-IN-AartiNeural</p>
-                  
+
                   <div className="flex flex-wrap gap-2 mt-3">
                     <span className="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full text-[10px] font-bold">Azure</span>
                     <span className="bg-neutral-200 text-neutral-700 px-2 py-0.5 rounded-full text-[10px] font-bold">English</span>
@@ -1017,7 +1011,7 @@ export function EditAssistantForm({ assistant, workspaceTools = [] }: EditAssist
                     </div>
                   </div>
                   <p className="text-[11px] font-mono text-neutral-500 mt-1">en-IN-ArjunNeural</p>
-                  
+
                   <div className="flex flex-wrap gap-2 mt-3">
                     <span className="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full text-[10px] font-bold">Azure</span>
                     <span className="bg-neutral-200 text-neutral-700 px-2 py-0.5 rounded-full text-[10px] font-bold">English</span>
@@ -1059,20 +1053,20 @@ export function EditAssistantForm({ assistant, workspaceTools = [] }: EditAssist
           </div>
 
           <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label className="eyebrow text-neutral-500">SPEED ({voiceSpeed}x)</Label>
-                <span className="font-mono text-xs font-bold text-black">{voiceSpeed}</span>
-              </div>
-              <input
-                type="range"
-                min="0.5"
-                max="2.0"
-                step="0.05"
-                value={voiceSpeed}
-                onChange={(e) => setVoiceSpeed(parseFloat(e.target.value) || 1.0)}
-                className="w-full h-1.5 bg-neutral-200 rounded-lg appearance-none cursor-pointer accent-emerald-500"
-              />
+            <div className="flex items-center justify-between">
+              <Label className="eyebrow text-neutral-500">SPEED ({voiceSpeed}x)</Label>
+              <span className="font-mono text-xs font-bold text-black">{voiceSpeed}</span>
             </div>
+            <input
+              type="range"
+              min="0.5"
+              max="2.0"
+              step="0.05"
+              value={voiceSpeed}
+              onChange={(e) => setVoiceSpeed(parseFloat(e.target.value) || 1.0)}
+              className="w-full h-1.5 bg-neutral-200 rounded-lg appearance-none cursor-pointer accent-emerald-500"
+            />
+          </div>
 
           {/* Voice Sample List */}
           <div className="space-y-3 pt-4 border-t border-hairline">
@@ -1089,11 +1083,10 @@ export function EditAssistantForm({ assistant, workspaceTools = [] }: EditAssist
                       setVoiceName(voice.name);
                       setVoiceLanguage(voice.language);
                     }}
-                    className={`p-3.5 rounded-[12px] border transition-all cursor-pointer flex items-center justify-between ${
-                      isSelected
+                    className={`p-3.5 rounded-[12px] border transition-all cursor-pointer flex items-center justify-between ${isSelected
                         ? "border-emerald-500 bg-emerald-50/30 shadow-xs"
                         : "border-hairline bg-surface-soft hover:bg-white"
-                    }`}
+                      }`}
                   >
                     <div>
                       <p className="text-xs font-bold text-black">{voice.title || voice.name}</p>
@@ -1108,11 +1101,10 @@ export function EditAssistantForm({ assistant, workspaceTools = [] }: EditAssist
                         e.stopPropagation();
                         handlePlayVoice(voice);
                       }}
-                      className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${
-                        isPlaying
+                      className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${isPlaying
                           ? "bg-emerald-600 text-white"
                           : "bg-white border border-hairline text-black hover:bg-neutral-100"
-                      }`}
+                        }`}
                     >
                       {isPlaying ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5 ml-0.5" />}
                     </button>
@@ -1159,11 +1151,10 @@ export function EditAssistantForm({ assistant, workspaceTools = [] }: EditAssist
                 return (
                   <div
                     key={t.id || t.name}
-                    className={`p-5 border rounded-[14px] transition-all ${
-                      isAssigned
+                    className={`p-5 border rounded-[14px] transition-all ${isAssigned
                         ? "border-emerald-500/40 bg-emerald-50/20 shadow-xs"
                         : "border-hairline bg-surface-soft/40 hover:bg-white"
-                    }`}
+                      }`}
                   >
                     <div className="flex items-start justify-between gap-4">
                       <div className="space-y-2 flex-1">
@@ -1171,13 +1162,12 @@ export function EditAssistantForm({ assistant, workspaceTools = [] }: EditAssist
                         <div className="flex items-center flex-wrap gap-2">
                           <h4 className="font-bold text-sm text-black">{t.name}</h4>
 
-                          <Badge className={`text-[10px] font-mono font-bold uppercase ${
-                            toolConfig.category === "READ"
+                          <Badge className={`text-[10px] font-mono font-bold uppercase ${toolConfig.category === "READ"
                               ? "bg-blue-100 text-blue-800 border-blue-200"
                               : toolConfig.category === "WRITE"
-                              ? "bg-amber-100 text-amber-800 border-amber-200"
-                              : "bg-red-100 text-red-800 border-red-200"
-                          }`}>
+                                ? "bg-amber-100 text-amber-800 border-amber-200"
+                                : "bg-red-100 text-red-800 border-red-200"
+                            }`}>
                             {toolConfig.category}
                           </Badge>
 
@@ -1245,13 +1235,12 @@ export function EditAssistantForm({ assistant, workspaceTools = [] }: EditAssist
                           type="button"
                           disabled={!isAuthorized}
                           onClick={() => handleToggleTool(t.id || t.name)}
-                          className={`text-xs font-bold px-4 py-2 rounded-full shrink-0 shadow-xs transition-all ${
-                            isAssigned
+                          className={`text-xs font-bold px-4 py-2 rounded-full shrink-0 shadow-xs transition-all ${isAssigned
                               ? "bg-black hover:bg-neutral-800 text-white"
                               : isAuthorized
-                              ? "bg-emerald-600 hover:bg-emerald-500 text-white"
-                              : "bg-neutral-200 text-neutral-400 cursor-not-allowed"
-                          }`}
+                                ? "bg-emerald-600 hover:bg-emerald-500 text-white"
+                                : "bg-neutral-200 text-neutral-400 cursor-not-allowed"
+                            }`}
                         >
                           {isAssigned ? "Connected ✓" : "+ Connect Tool"}
                         </Button>

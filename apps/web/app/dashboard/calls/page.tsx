@@ -5,7 +5,10 @@ import CallsClient, { CallItem } from "./CallsClient";
 
 export const dynamic = "force-dynamic";
 
+import { verifyRouteAccess } from "@/app/actions/adminSidebarPermissions";
+
 export default async function CallLogsPage() {
+  await verifyRouteAccess("/dashboard/calls");
   const cookieStore = await cookies();
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,

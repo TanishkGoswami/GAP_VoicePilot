@@ -5,7 +5,10 @@ import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { createClient } from "@supabase/supabase-js";
 
+import { verifyRouteAccess } from "@/app/actions/adminSidebarPermissions";
+
 export default async function DashboardPage() {
+  await verifyRouteAccess("/dashboard");
   const cookieStore = await cookies();
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,

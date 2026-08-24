@@ -20,6 +20,7 @@ import {
   Webhook,
   ShieldCheck,
   Shield,
+  Lock,
   X,
 } from "lucide-react";
 
@@ -63,8 +64,10 @@ export function SessionNavBar({
     isAdmin: false,
   });
 
+  const [sidebarPermissions, setSidebarPermissions] = useState<Record<string, "user" | "admin">>({});
+
   useEffect(() => {
-    const fetchUser = async () => {
+    const fetchUserAndPermissions = async () => {
       try {
         const { createClient } = await import("@/utils/supabase/client");
         const supabase = createClient();
@@ -75,7 +78,7 @@ export function SessionNavBar({
             user.user_metadata?.full_name ||
             user.user_metadata?.name ||
             (email ? email.split("@")[0] : "User");
-          
+
           let initials = "GV";
           if (name && name !== "User") {
             const parts = name.trim().split(" ");
@@ -93,11 +96,15 @@ export function SessionNavBar({
 
           setUserProfile({ email, name, initials, isAdmin });
         }
+
+        const { getSidebarPermissionsAction } = await import("@/app/actions/adminSidebarPermissions");
+        const perms = await getSidebarPermissionsAction();
+        setSidebarPermissions(perms);
       } catch (e) {
-        console.warn("Could not load user profile in sidebar:", e);
+        console.warn("Could not load user profile or sidebar permissions in sidebar:", e);
       }
     };
-    fetchUser();
+    fetchUserAndPermissions();
   }, []);
 
   const mainNav = [
@@ -128,7 +135,22 @@ export function SessionNavBar({
       badge: "ADMIN",
       badgeVariant: "new",
     } as any);
+    mainNav.push({
+      name: "Sidebar Permissions",
+      href: "/dashboard/admin/sidebar-permissions",
+      icon: Lock,
+      badge: "ADMIN",
+      badgeVariant: "new",
+    } as any);
   }
+
+  const filteredNav = mainNav.filter((item) => {
+    const perm = sidebarPermissions[item.href] || "user";
+    if (perm === "admin" && !userProfile.isAdmin) {
+      return false;
+    }
+    return true;
+  });
 
   return (
     <>
@@ -157,7 +179,7 @@ export function SessionNavBar({
                 <p className="px-3 text-[10px] font-sans font-bold uppercase tracking-wider text-neutral-400 mb-2">
                   NAVIGATION
                 </p>
-                {mainNav.map((item) => {
+                {filteredNav.map((item) => {
                   const isActive =
                     pathname === item.href ||
                     (item.href !== "/dashboard" && pathname?.startsWith(item.href));
@@ -228,7 +250,7 @@ export function SessionNavBar({
                 </p>
               )}
 
-              {mainNav.map((item) => {
+              {filteredNav.map((item) => {
                 const isActive =
                   pathname === item.href ||
                   (item.href !== "/dashboard" && pathname?.startsWith(item.href));

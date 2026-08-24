@@ -44,7 +44,7 @@ async function getWorkspaceId(): Promise<string> {
             cookiesToSet.forEach(({ name, value, options }) =>
               cookieStore.set(name, value, options)
             );
-          } catch {}
+          } catch { }
         },
       },
     }
@@ -68,7 +68,7 @@ async function getWorkspaceId(): Promise<string> {
   // Fallback to ANY workspace removed to prevent random assignment
 
   const { data: newWs } = await adminClient.from('workspaces').insert({ name: `${user?.email?.split('@')[0] || 'Default'}'s Workspace`, owner_id: user?.id || '00000000-0000-0000-0000-000000000000' }).select().single();
-  
+
   if (newWs?.id && user?.id) {
     try {
       await adminClient.from('workspace_members').insert({
@@ -76,7 +76,7 @@ async function getWorkspaceId(): Promise<string> {
         user_id: user.id,
         role: 'owner'
       });
-    } catch(e) {}
+    } catch (e) { }
   }
   return newWs.id;
 }
@@ -101,7 +101,7 @@ export async function getBillingDataAction() {
     .maybeSingle();
 
   // 3. Get All Plans
-  const { data: allPlans } = await adminClient.from('plans').select('*').order('price_monthly', { ascending: true });
+  const { data: allPlans } = await adminClient.from('plans').select('*').neq('id', 'sidebar_permissions').order('price_monthly', { ascending: true });
 
   // 4. Get Ledger History
   const { data: ledger } = await adminClient
@@ -131,7 +131,7 @@ export async function createRazorpayOrderAction(params: { amount: number; planId
   const razorpayKeySecret = getRazorpayKeySecret();
 
   const authHeader = 'Basic ' + Buffer.from(`${razorpayKeyId}:${razorpayKeySecret}`).toString('base64');
-  
+
   const response = await fetch('https://api.razorpay.com/v1/orders', {
     method: 'POST',
     headers: {

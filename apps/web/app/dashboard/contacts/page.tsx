@@ -5,7 +5,10 @@ import { ContactsClient, VoiceContact, AssistantOption } from "./ContactsClient"
 
 export const dynamic = "force-dynamic";
 
+import { verifyRouteAccess } from "@/app/actions/adminSidebarPermissions";
+
 export default async function ContactsPage() {
+  await verifyRouteAccess("/dashboard/contacts");
   const cookieStore = await cookies();
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,

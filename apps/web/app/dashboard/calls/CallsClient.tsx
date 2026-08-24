@@ -354,7 +354,7 @@ export default function CallsClient({ initialCalls, assistants }: CallsClientPro
         <div className="bg-block-lime rounded-[14px] p-5 text-black border border-black/5">
           <p className="eyebrow text-black/70">TOTAL DISPATCHED</p>
           <p className="text-3xl font-bold mt-2">{totalCalls} Calls</p>
-          <p className="text-xs text-black/70 mt-1">Direct via Vomyra SIP Pipeline</p>
+          <p className="text-xs text-black/70 mt-1">Direct via VoicePilot Telephony Pipeline</p>
         </div>
 
         <div className="bg-block-lilac rounded-[14px] p-5 text-black border border-black/5">
@@ -435,8 +435,8 @@ export default function CallsClient({ initialCalls, assistants }: CallsClientPro
                         }}
                         className="btn-pill-primary rounded-[8px] text-[11px] px-3 py-1.5 inline-flex items-center gap-1.5 shadow-xs"
                       >
-                        <Play className="w-3 h-3" />
-                        Listen & Inspect
+                        <FileText className="w-3.5 h-3.5" />
+                        Inspect Transcript
                       </button>
                     </div>
                   </td>
@@ -479,97 +479,7 @@ export default function CallsClient({ initialCalls, assistants }: CallsClientPro
                 <X className="h-5 w-5" />
               </button>
             </div>
-            {/* Hidden HTML5 Audio Element */}
-            <audio
-              ref={audioRef}
-              onTimeUpdate={() => {
-                if (audioRef.current) {
-                  setCurrentTime(audioRef.current.currentTime);
-                  setDuration(audioRef.current.duration || 0);
-                }
-              }}
-              onLoadedMetadata={() => {
-                if (audioRef.current) {
-                  setDuration(audioRef.current.duration || 0);
-                }
-              }}
-              onEnded={() => {
-                setIsPlayingAudio(false);
-                setCurrentTime(0);
-              }}
-              onError={() => {
-                setIsPlayingAudio(false);
-              }}
-              className="hidden"
-            />
-
-            {/* Audio Recording Player Bar */}
-            <div className="bg-surface-soft/80 border border-hairline rounded-[14px] p-4 space-y-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-full bg-black text-white flex items-center justify-center">
-                    <Volume2 className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <p className="text-xs font-bold text-black">Call Audio Recording</p>
-                    <p className="text-[11px] text-neutral-500 font-mono">
-                      {isLoadingAudio ? "Connecting to telephony media stream..." : activeRecordingUrl ? activeRecordingUrl.slice(0, 45) + "..." : "telephony_audio_stream.wav"}
-                    </p>
-                  </div>
-                </div>
-                
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-mono font-bold text-neutral-700 bg-white border border-hairline px-2.5 py-1 rounded-[6px]">
-                    {formatTime(currentTime)} / {duration > 0 ? formatTime(duration) : selectedCall.duration}
-                  </span>
-                  {activeRecordingUrl && (
-                    <a
-                      href={activeRecordingUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      download
-                      className="p-1.5 bg-white hover:bg-neutral-100 border border-hairline rounded-[6px] text-neutral-600 hover:text-black transition-colors"
-                      title="Download Audio Recording"
-                    >
-                      <Download className="w-3.5 h-3.5" />
-                    </a>
-                  )}
-                </div>
-              </div>
-
-              <div className="flex items-center gap-3 pt-1">
-                <button
-                  onClick={togglePlayAudio}
-                  disabled={isLoadingAudio}
-                  className="w-10 h-10 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white flex items-center justify-center shrink-0 shadow-sm transition-transform active:scale-95 disabled:opacity-50"
-                >
-                  {isLoadingAudio ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : isPlayingAudio ? (
-                    <Pause className="w-4 h-4" />
-                  ) : (
-                    <Play className="w-4 h-4 ml-0.5" />
-                  )}
-                </button>
-
-                {/* Interactive Audio Progress Scrubber */}
-                <div className="flex-1 flex items-center gap-2">
-                  <input
-                    type="range"
-                    min="0"
-                    max={duration || selectedCall.durationSeconds || 100}
-                    step="0.1"
-                    value={currentTime}
-                    onChange={handleSeek}
-                    className="w-full accent-emerald-600 cursor-pointer h-1.5 bg-neutral-200 rounded-lg appearance-none"
-                  />
-                </div>
-              </div>
-
-              {audioError && (
-                <p className="text-[11px] text-amber-600 font-medium">{audioError}</p>
-              )}
-            </div>
+            {/* Audio elements and player bar removed as requested */}
 
             {/* AI Summary Card */}
             <div className="rounded-[14px] bg-block-cream border border-black/10 p-4 space-y-2">

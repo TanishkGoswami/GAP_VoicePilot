@@ -6,6 +6,9 @@ export const metadata = {
   description: "Configure event-driven workflow rules for AI call events.",
 };
 
-export default function WorkflowsPage() {
+import { verifyRouteAccess } from "@/app/actions/adminSidebarPermissions";
+
+export default async function WorkflowsPage() {
+  await verifyRouteAccess("/dashboard/workflows");
   return <WorkflowsClient />;
 }

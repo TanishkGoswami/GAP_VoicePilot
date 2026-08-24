@@ -5,7 +5,10 @@ import { createClient } from "@supabase/supabase-js";
 import { Plus, Bot, Mic, Activity, ArrowUpRight, Zap } from "lucide-react";
 import AssistantActionMenu from "./AssistantActionMenu";
 
+import { verifyRouteAccess } from "@/app/actions/adminSidebarPermissions";
+
 export default async function AssistantsPage() {
+  await verifyRouteAccess("/dashboard/assistants");
   const cookieStore = await cookies();
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,

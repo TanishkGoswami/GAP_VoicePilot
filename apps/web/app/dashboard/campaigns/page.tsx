@@ -5,7 +5,10 @@ import { CampaignsClient, CampaignJob, AssistantOption } from "./CampaignsClient
 
 export const dynamic = "force-dynamic";
 
+import { verifyRouteAccess } from "@/app/actions/adminSidebarPermissions";
+
 export default async function CampaignsPage() {
+  await verifyRouteAccess("/dashboard/campaigns");
   const cookieStore = await cookies();
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,

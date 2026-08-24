@@ -64,7 +64,7 @@ export function AdminKycClient({ initialRequests, initialAvailableNumbers = [] }
         <div>
           <p className="eyebrow text-neutral-500">// ADMIN PANEL</p>
           <h1 className="text-3xl font-bold tracking-tight text-black mt-1">KYC Review & Assignment</h1>
-          <p className="text-sm text-neutral-600">Review user KYC submissions and assign Vomyra phone numbers.</p>
+          <p className="text-sm text-neutral-600">Review user KYC submissions and assign phone numbers.</p>
         </div>
       </div>
 
