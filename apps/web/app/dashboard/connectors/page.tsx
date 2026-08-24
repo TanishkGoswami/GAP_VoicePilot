@@ -6,6 +6,9 @@ export const metadata = {
   description: "Manage enterprise tool connectors and AI assistant permissions.",
 };
 
-export default function ConnectorsPage() {
+import { verifyRouteAccess } from "@/app/actions/adminSidebarPermissions";
+
+export default async function ConnectorsPage() {
+  await verifyRouteAccess("/dashboard/connectors");
   return <ConnectorsClient />;
 }

@@ -319,7 +319,7 @@ export function AgentIntegrationsPermissions({ assistantId }: AgentIntegrationsP
                                 </Badge>
                                 {t.realtimeSuitability ? (
                                   <Badge className="bg-blue-100 text-blue-800 border-blue-300 text-[9px] font-mono py-0">
-                                    USE DURING CALLS (VOMYRA SYNC)
+                                    USE DURING CALLS (REAL-TIME SYNC)
                                   </Badge>
                                 ) : (
                                   <Badge variant="secondary" className="text-[9px] font-mono py-0 text-neutral-500">

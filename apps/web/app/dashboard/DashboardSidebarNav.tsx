@@ -2,14 +2,14 @@
 
 import React from "react";
 import { usePathname } from "next/navigation";
-import { 
-  LayoutDashboard, 
-  Bot, 
+import {
+  LayoutDashboard,
+  Bot,
   Users,
-  PhoneCall, 
-  Phone, 
-  FileText, 
-  BarChart3, 
+  PhoneCall,
+  Phone,
+  FileText,
+  BarChart3,
   CreditCard,
   Settings,
   Share2,

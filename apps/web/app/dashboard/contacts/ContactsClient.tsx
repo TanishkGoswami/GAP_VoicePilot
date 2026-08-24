@@ -80,7 +80,7 @@ export function ContactsClient({ initialContacts, assistants }: ContactsClientPr
     if (!selectedContact || !selectedAssistantId) return;
 
     setIsCalling(true);
-    setCallStatusMessage("Connecting to Vomyra Voice AI Engine...");
+    setCallStatusMessage("Connecting to Voice AI Engine...");
 
     try {
       const res = await triggerTestCallAction({

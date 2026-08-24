@@ -386,7 +386,7 @@ export function PhoneNumbersClient({
                         <td className="px-6 py-4">
                           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold uppercase bg-surface-soft border border-hairline text-neutral-800">
                             <Globe className="w-3 h-3 text-neutral-400" />
-                            {item.provider}
+                            {item.provider === "vomyra" ? "VoicePilot" : item.provider}
                           </span>
                         </td>
 
