@@ -515,7 +515,12 @@ Escalate to the appropriate department when necessary, and clearly inform the ca
     try {
       const fd = new FormData();
       fd.append("payload", JSON.stringify(payload));
-      await createAssistantAction(fd);
+      const res = await createAssistantAction(fd);
+      if (res && res.success === false) {
+        alert("Failed to create assistant: " + (res.error || "Unknown server error"));
+        setIsPending(false);
+        return;
+      }
       router.push("/dashboard/assistants");
     } catch (err: any) {
       alert("Failed to create assistant: " + err.message);

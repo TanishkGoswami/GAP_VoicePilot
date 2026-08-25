@@ -211,173 +211,183 @@ export async function generatePromptAction(topic: string, category: string = 'ge
 }
 
 export async function createAssistantAction(formData: FormData) {
-  const payloadStr = formData.get("payload");
-  if (!payloadStr) throw new Error("No payload found");
-  
-  const payload = JSON.parse(payloadStr as string);
-
-  const cookieStore = await cookies();
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return cookieStore.getAll();
-        },
-        setAll(cookiesToSet) {
-          try {
-            cookiesToSet.forEach(({ name, value, options }) =>
-              cookieStore.set(name, value, options)
-            );
-          } catch {}
-        },
-      },
-    }
-  );
-
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error("Unauthorized");
-
-  const workspaceId = await getOrCreateWorkspace(supabase, user);
-
-  let rawApiUrl = process.env.NEXT_PUBLIC_API_URL || process.env.API_URL || 'http://127.0.0.1:8000';
-  if (rawApiUrl.includes('localhost')) {
-    rawApiUrl = rawApiUrl.replace('localhost', '127.0.0.1');
-  }
-  const targetUrl = `${rawApiUrl.replace(/\/$/, '')}/api/v1/assistants`;
-
-  // Attempt 1: Call Express API Backend
   try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 6000);
+    const payloadStr = formData.get("payload");
+    if (!payloadStr) return { success: false, error: "No payload found" };
+    
+    const payload = JSON.parse(payloadStr as string);
 
-    const res = await fetch(targetUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        workspaceId: workspaceId,
-        createdBy: user.id,
-        ...payload
-      }),
-      signal: controller.signal
-    });
-    clearTimeout(timeoutId);
-
-    if (res.ok) {
-      const data = await res.json();
-      revalidatePath('/dashboard/assistants');
-      return { success: true, data };
-    } else {
-      let errMessage = 'Failed to create assistant on Express API';
-      try {
-        const parsed = await res.json();
-        errMessage = parsed.error || errMessage;
-      } catch {
-        const text = await res.text();
-        errMessage = `Server Error (${res.status}): ${text.slice(0, 100)}`;
-      }
-      console.warn(`[createAssistantAction] Express API returned non-200 status (${res.status}): ${errMessage}`);
-    }
-  } catch (expressErr: any) {
-    console.warn(`[createAssistantAction] Express API fetch failed (${expressErr.name}: ${expressErr.message}). Falling back to direct Vomyra + Supabase.`);
-  }
-
-  // Attempt 2: Direct Supabase + Vomyra Fallback
-  try {
-    const adminClient = createClient(
+    const cookieStore = await cookies();
+    const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
+      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
+      {
+        cookies: {
+          getAll() {
+            return cookieStore.getAll();
+          },
+          setAll(cookiesToSet) {
+            try {
+              cookiesToSet.forEach(({ name, value, options }) =>
+                cookieStore.set(name, value, options)
+              );
+            } catch {}
+          },
+        },
+      }
     );
 
-    const vomyraApiKey = process.env.VOMYRA_API_KEY || '0KBY8fRk1ptydIq20Q8tkoBRGXn2KYhx';
-    const vomyraBaseUrl = process.env.VOMYRA_BASE_URL || 'https://api.vomyra.com';
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { success: false, error: "Unauthorized: Please log in again." };
 
-    const sanitizedPayload = { ...payload };
-    const customIntegrations = ['petpooja', 'gsheets', 'gcal', 'webhook'];
-    for (const key of customIntegrations) {
-      delete sanitizedPayload[key];
-    }
-    if (sanitizedPayload.voice) {
-      const voiceObj = { ...sanitizedPayload.voice };
-      if (!voiceObj.tts_model) delete voiceObj.tts_model;
-      sanitizedPayload.voice = voiceObj;
+    let workspaceId: string;
+    try {
+      workspaceId = await getOrCreateWorkspace(supabase, user);
+    } catch (wsErr: any) {
+      return { success: false, error: wsErr.message || "Failed to resolve workspace." };
     }
 
-    let realVomyraId = '';
-    let vomyraData: any = {};
-
-    if (vomyraApiKey) {
-      try {
-        const vRes = await fetch(`${vomyraBaseUrl}/v1/assistants`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'x-api-key': vomyraApiKey
-          },
-          body: JSON.stringify(sanitizedPayload)
-        });
-
-        if (vRes.ok) {
-          const resJson = await vRes.json();
-          vomyraData = resJson.data || resJson || {};
-          realVomyraId = vomyraData.id || resJson.id || resJson._id || '';
-        } else {
-          const errText = await vRes.text();
-          console.warn(`[createAssistantAction] Direct Vomyra API error (${vRes.status}):`, errText);
-        }
-      } catch (vErr: any) {
-        console.warn(`[createAssistantAction] Direct Vomyra fetch error:`, vErr.message);
-      }
+    let rawApiUrl = process.env.NEXT_PUBLIC_API_URL || process.env.API_URL || 'http://127.0.0.1:8000';
+    if (rawApiUrl.includes('localhost')) {
+      rawApiUrl = rawApiUrl.replace('localhost', '127.0.0.1');
     }
+    const targetUrl = `${rawApiUrl.replace(/\/$/, '')}/api/v1/assistants`;
 
-    if (!realVomyraId) {
-      realVomyraId = `ast_${Date.now()}`;
-    }
+    // Attempt 1: Call Express API Backend
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 6000);
 
-    const finalSnapshot = {
-      ...vomyraData,
-      ...payload
-    };
+      const res = await fetch(targetUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          workspaceId: workspaceId,
+          createdBy: user.id,
+          ...payload
+        }),
+        signal: controller.signal
+      });
+      clearTimeout(timeoutId);
 
-    const { data: newAssistant, error: dbInsertErr } = await adminClient.from('assistants').insert({
-      workspace_id: workspaceId,
-      created_by: user.id,
-      provider: 'vomyra',
-      provider_resource_id: realVomyraId,
-      name: payload.name || 'Untitled Assistant',
-      config_snapshot: finalSnapshot,
-      status: 'active'
-    }).select().single();
-
-    if (dbInsertErr) {
-      console.error('[createAssistantAction] Database Save Error:', dbInsertErr.message);
-      throw new Error(`Database Save Error: ${dbInsertErr.message}`);
-    }
-
-    // Sync tools if selected_tools array is provided
-    if (Array.isArray(payload.selected_tools) && newAssistant?.id) {
-      for (const tId of payload.selected_tools) {
+      if (res.ok) {
+        const data = await res.json();
+        revalidatePath('/dashboard/assistants');
+        return { success: true, data };
+      } else {
+        let errMessage = 'Failed to create assistant on Express API';
         try {
-          await adminClient.from('assistant_tool_assignments').upsert({
-            assistant_id: newAssistant.id,
-            tool_id: tId,
-            enabled: true,
-            updated_at: new Date().toISOString()
-          }, { onConflict: 'assistant_id,tool_id' });
-        } catch (tErr: any) {
-          console.warn(`[createAssistantAction] Tool assignment error:`, tErr.message);
+          const parsed = await res.json();
+          errMessage = parsed.error || errMessage;
+        } catch {
+          const text = await res.text();
+          errMessage = `Server Error (${res.status}): ${text.slice(0, 100)}`;
         }
+        console.warn(`[createAssistantAction] Express API returned non-200 status (${res.status}): ${errMessage}`);
       }
+    } catch (expressErr: any) {
+      console.warn(`[createAssistantAction] Express API fetch failed (${expressErr.name}: ${expressErr.message}). Falling back to direct Vomyra + Supabase.`);
     }
 
-    revalidatePath('/dashboard/assistants');
-    return { success: true, data: newAssistant };
-  } catch (fallbackErr: any) {
-    console.error(`[createAssistantAction] Direct creation failed:`, fallbackErr);
-    throw new Error(fallbackErr.message || 'Failed to create assistant');
+    // Attempt 2: Direct Supabase + Vomyra Fallback
+    try {
+      const adminClient = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!
+      );
+
+      const vomyraApiKey = process.env.VOMYRA_API_KEY || '0KBY8fRk1ptydIq20Q8tkoBRGXn2KYhx';
+      const vomyraBaseUrl = process.env.VOMYRA_BASE_URL || 'https://api.vomyra.com';
+
+      const sanitizedPayload = { ...payload };
+      const customIntegrations = ['petpooja', 'gsheets', 'gcal', 'webhook'];
+      for (const key of customIntegrations) {
+        delete sanitizedPayload[key];
+      }
+      if (sanitizedPayload.voice) {
+        const voiceObj = { ...sanitizedPayload.voice };
+        if (!voiceObj.tts_model) delete voiceObj.tts_model;
+        sanitizedPayload.voice = voiceObj;
+      }
+
+      let realVomyraId = '';
+      let vomyraData: any = {};
+
+      if (vomyraApiKey) {
+        try {
+          const vRes = await fetch(`${vomyraBaseUrl}/v1/assistants`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'x-api-key': vomyraApiKey
+            },
+            body: JSON.stringify(sanitizedPayload)
+          });
+
+          if (vRes.ok) {
+            const resJson = await vRes.json();
+            vomyraData = resJson.data || resJson || {};
+            realVomyraId = vomyraData.id || resJson.id || resJson._id || '';
+          } else {
+            const errText = await vRes.text();
+            console.warn(`[createAssistantAction] Direct Vomyra API error (${vRes.status}):`, errText);
+          }
+        } catch (vErr: any) {
+          console.warn(`[createAssistantAction] Direct Vomyra fetch error:`, vErr.message);
+        }
+      }
+
+      if (!realVomyraId) {
+        realVomyraId = `ast_${Date.now()}`;
+      }
+
+      const finalSnapshot = {
+        ...vomyraData,
+        ...payload
+      };
+
+      const { data: newAssistant, error: dbInsertErr } = await adminClient.from('assistants').insert({
+        workspace_id: workspaceId,
+        created_by: user.id,
+        provider: 'vomyra',
+        provider_resource_id: realVomyraId,
+        name: payload.name || 'Untitled Assistant',
+        config_snapshot: finalSnapshot,
+        status: 'active'
+      }).select().single();
+
+      if (dbInsertErr) {
+        console.error('[createAssistantAction] Database Save Error:', dbInsertErr.message);
+        return { success: false, error: `Database Save Error: ${dbInsertErr.message}` };
+      }
+
+      // Sync tools if selected_tools array is provided
+      if (Array.isArray(payload.selected_tools) && newAssistant?.id) {
+        for (const tId of payload.selected_tools) {
+          try {
+            await adminClient.from('assistant_tool_assignments').upsert({
+              assistant_id: newAssistant.id,
+              tool_id: tId,
+              enabled: true,
+              updated_at: new Date().toISOString()
+            }, { onConflict: 'assistant_id,tool_id' });
+          } catch (tErr: any) {
+            console.warn(`[createAssistantAction] Tool assignment error:`, tErr.message);
+          }
+        }
+      }
+
+      revalidatePath('/dashboard/assistants');
+      return { success: true, data: newAssistant };
+    } catch (fallbackErr: any) {
+      console.error(`[createAssistantAction] Direct creation failed:`, fallbackErr);
+      return { success: false, error: fallbackErr.message || 'Failed to create assistant' };
+    }
+  } catch (topErr: any) {
+    console.error(`[createAssistantAction] Top-level error:`, topErr);
+    return { success: false, error: topErr.message || 'Unexpected server error while creating assistant' };
   }
 }
 
