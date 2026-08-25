@@ -161,24 +161,46 @@ export async function POST(request: NextRequest) {
     const redirectTo = `${origin}/auth/callback`;
 
     // Generate passwordless magic link for user
-    const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
+    let { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
       type: "magiclink",
       email,
       options: { redirectTo },
     });
 
-    if (linkError || !linkData?.properties?.action_link) {
-      console.error("[SSO] generateLink error:", linkError?.message);
-      return NextResponse.json(
-        { success: false, error: linkError?.message || "Failed to generate authentication link" },
-        { status: 500 }
-      );
+    let actionLink = linkData?.properties?.action_link;
+
+    if (linkError || !actionLink) {
+      console.log(`[SSO] generateLink notice (${linkError?.message}), ensuring user ${email} is created...`);
+      const { error: createError } = await supabaseAdmin.auth.admin.createUser({
+        email,
+        email_confirm: true,
+      });
+
+      if (createError && !createError.message?.toLowerCase().includes("already")) {
+        console.warn("[SSO] createUser notice:", createError.message);
+      }
+
+      const { data: retryLinkData, error: retryError } = await supabaseAdmin.auth.admin.generateLink({
+        type: "magiclink",
+        email,
+        options: { redirectTo },
+      });
+
+      if (retryError || !retryLinkData?.properties?.action_link) {
+        console.error("[SSO] generateLink retry error:", retryError?.message);
+        return NextResponse.json(
+          { success: false, error: retryError?.message || linkError?.message || "Failed to generate authentication link" },
+          { status: 500 }
+        );
+      }
+
+      actionLink = retryLinkData.properties.action_link;
     }
 
     console.log(`[SSO] ✅ Successfully issued magic link for ${email}`);
     return NextResponse.json({
       success: true,
-      magic_link_url: linkData.properties.action_link,
+      magic_link_url: actionLink,
     });
   } catch (err: any) {
     console.error("[SSO] Unexpected error during SSO token processing:", err?.message);
