@@ -38,6 +38,10 @@ export function EditAssistantForm({ assistant, workspaceTools = [] }: EditAssist
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
   const [isTestModalOpen, setIsTestModalOpen] = React.useState(false);
 
+  // Validation Errors
+  const [nameError, setNameError] = React.useState<string | null>(null);
+  const [systemPromptError, setSystemPromptError] = React.useState<string | null>(null);
+
   const initialCfg = assistant.config_snapshot || {};
   const initialTransfer = initialCfg.transfer_call_settings || {};
 
@@ -337,6 +341,25 @@ export function EditAssistantForm({ assistant, workspaceTools = [] }: EditAssist
 
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
+    setNameError(null);
+    setSystemPromptError(null);
+    setErrorMessage(null);
+
+    let hasError = false;
+    if (!name.trim()) {
+      setNameError("Assistant Name cannot be empty.");
+      hasError = true;
+    }
+    if (!systemPrompt.trim()) {
+      setSystemPromptError("System Prompt cannot be empty.");
+      hasError = true;
+    }
+
+    if (hasError) {
+      setActiveTab("model");
+      return;
+    }
+
     setIsUpdating(true);
     setErrorMessage(null);
 
@@ -543,13 +566,24 @@ export function EditAssistantForm({ assistant, workspaceTools = [] }: EditAssist
           </div>
 
           <div className="space-y-2">
-            <Label className="eyebrow text-neutral-500">ASSISTANT NAME *</Label>
+            <Label className="eyebrow text-neutral-500 flex items-center justify-between">
+              <span>ASSISTANT NAME <span className="text-red-500 font-bold">*</span></span>
+              <span className="text-[10px] text-amber-600 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-[6px] font-semibold italic normal-case flex items-center gap-1 shadow-sm shrink-0">
+                Required Field
+              </span>
+            </Label>
             <Input
               value={name}
               onChange={(e) => setName(e.target.value)}
               className="bg-surface-soft border border-hairline rounded-[10px] px-4 py-2 text-xs font-semibold text-black"
               required
             />
+            {nameError && (
+              <p className="text-xs text-red-600 font-semibold mt-1.5 flex items-center gap-1 animate-fadeIn">
+                <AlertTriangle className="w-3.5 h-3.5 text-red-500" />
+                <span>{nameError}</span>
+              </p>
+            )}
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -647,7 +681,12 @@ export function EditAssistantForm({ assistant, workspaceTools = [] }: EditAssist
           <div className="space-y-2 pt-4 border-t border-hairline">
             <div className="flex items-center justify-between">
               <div>
-                <Label className="eyebrow text-neutral-500">SYSTEM PROMPT (AGENT INSTRUCTIONS)</Label>
+                <div className="flex items-center gap-2">
+                  <Label className="eyebrow text-neutral-500">SYSTEM PROMPT (AGENT INSTRUCTIONS) <span className="text-red-500 font-bold">*</span></Label>
+                  <span className="text-[10px] text-amber-600 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-[6px] font-semibold italic normal-case flex items-center gap-1 shadow-sm shrink-0">
+                    Required Field
+                  </span>
+                </div>
                 <p className="text-xs text-neutral-500">Define the personality, operational rules, role, and conversation flow.</p>
               </div>
 
@@ -668,6 +707,12 @@ export function EditAssistantForm({ assistant, workspaceTools = [] }: EditAssist
               placeholder="You are an expert AI Voice Assistant..."
               className="bg-surface-soft border border-hairline rounded-[10px] p-3.5 text-xs text-black font-mono leading-relaxed resize-y"
             />
+            {systemPromptError && (
+              <p className="text-xs text-red-600 font-semibold mt-1.5 flex items-center gap-1 animate-fadeIn">
+                <AlertTriangle className="w-3.5 h-3.5 text-red-500" />
+                <span>{systemPromptError}</span>
+              </p>
+            )}
           </div>
 
           {/* Action Modals Trigger Bar */}

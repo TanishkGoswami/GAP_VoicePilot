@@ -204,17 +204,36 @@ export async function triggerOneTimeDemoCallAction(params: TriggerOneTimeDemoCal
 
     if (!demoAssistantId) {
       try {
-        const { data: astList } = await adminClient
+        // Query the current user's workspace assistants first
+        const { data: workspaceAsts } = await adminClient
           .from("assistants")
           .select("provider_resource_id")
+          .eq("workspace_id", workspace.workspaceId || "")
           .is("deleted_at", null)
           .not("provider_resource_id", "is", null)
           .order("created_at", { ascending: false });
 
-        if (astList && astList.length > 0) {
-          const validAst = astList.find((a: any) => a.provider_resource_id && /^[0-9a-fA-F]{24}$/.test(a.provider_resource_id));
+        if (workspaceAsts && workspaceAsts.length > 0) {
+          const validAst = workspaceAsts.find((a: any) => a.provider_resource_id && /^[0-9a-fA-F]{24}$/.test(a.provider_resource_id));
           if (validAst) {
             demoAssistantId = validAst.provider_resource_id;
+          }
+        }
+
+        // If not found in workspace, fall back to any assistant in the system
+        if (!demoAssistantId) {
+          const { data: astList } = await adminClient
+            .from("assistants")
+            .select("provider_resource_id")
+            .is("deleted_at", null)
+            .not("provider_resource_id", "is", null)
+            .order("created_at", { ascending: false });
+
+          if (astList && astList.length > 0) {
+            const validAst = astList.find((a: any) => a.provider_resource_id && /^[0-9a-fA-F]{24}$/.test(a.provider_resource_id));
+            if (validAst) {
+              demoAssistantId = validAst.provider_resource_id;
+            }
           }
         }
       } catch (e) {}
@@ -227,7 +246,8 @@ export async function triggerOneTimeDemoCallAction(params: TriggerOneTimeDemoCal
     const callResult = await triggerTestCallAction({
       customerNumber: formattedPhone,
       customerName: user?.user_metadata?.name || user?.email?.split("@")[0] || "Demo Visitor",
-      assignedNumber: "7943494977",
+      assignedNumber: demoAssistantId === "6a79b1f312df58f68ce4e836" ? "7943494977" : undefined,
+      assistantId: demoAssistantId,
     });
 
     // 6. Handle Call Result

@@ -107,6 +107,10 @@ export default async function CampaignsPage() {
       const userAssistantNames = new Set(assistantOptions.map(a => a.name));
       
       const rawCalls = allRawCalls.filter((c: any) => {
+        // Exclude web simulator calls and manual quick test calls from campaign reconstruction
+        if (c.call_type === "web") return false;
+        if (c.additional_data?.source === "GAP_VoicePilot_WebConsole") return false;
+
         const astId = c.assistant?.id || "";
         const astName = c.assistant?.name || (c.additional_data?.campaign_name || "");
         return userAssistantIds.has(astId) || userAssistantNames.has(astName);

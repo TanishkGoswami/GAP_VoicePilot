@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { GAP_CATALOG, VoiceOption } from "@/lib/catalog";
 import { createAssistantAction, generatePromptAction } from "@/app/actions/assistants";
-import { Play, Volume2, Check, Sparkles, Bot, Mic, Cpu, Settings2, Wand2, X, Plus, Trash2, Phone, MessageSquare, PhoneCall, Copy, ExternalLink, CheckCircle2 } from "lucide-react";
+import { Play, Volume2, Check, Sparkles, Bot, Mic, Cpu, Settings2, Wand2, X, Plus, Trash2, Phone, MessageSquare, PhoneCall, Copy, ExternalLink, CheckCircle2, AlertTriangle } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 export function CreateAssistantForm() {
@@ -28,6 +28,10 @@ export function CreateAssistantForm() {
   const [callDuration, setCallDuration] = React.useState(0);
 
   const audioRef = React.useRef<HTMLAudioElement | null>(null);
+
+  // Validation Errors
+  const [nameError, setNameError] = React.useState<string | null>(null);
+  const [systemPromptError, setSystemPromptError] = React.useState<string | null>(null);
 
   // Model state
   const [name, setName] = React.useState("Sales Representative Bot");
@@ -439,6 +443,25 @@ Escalate to the appropriate department when necessary, and clearly inform the ca
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setNameError(null);
+    setSystemPromptError(null);
+
+    let hasError = false;
+    if (!name.trim()) {
+      setNameError("Assistant Name is required.");
+      hasError = true;
+    }
+    if (!systemPrompt.trim()) {
+      setSystemPromptError("System Prompt is required to configure the assistant's behavior.");
+      hasError = true;
+    }
+
+    if (hasError) {
+      setTopNav("configuration");
+      setActiveTab("model");
+      return;
+    }
+
     setIsPending(true);
 
     const payload = {
@@ -672,13 +695,24 @@ Escalate to the appropriate department when necessary, and clearly inform the ca
               </div>
 
               <div className="space-y-2">
-                <Label className="eyebrow text-neutral-500">ASSISTANT NAME *</Label>
+                <Label className="eyebrow text-neutral-500 flex items-center justify-between">
+                  <span>ASSISTANT NAME <span className="text-red-500 font-bold">*</span></span>
+                  <span className="text-[10px] text-amber-600 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-[6px] font-semibold italic normal-case flex items-center gap-1 shadow-sm shrink-0">
+                    Required Field
+                  </span>
+                </Label>
                 <Input
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   className="bg-surface-soft border border-hairline rounded-[10px] px-4 py-2 text-xs font-semibold text-black"
                   required
                 />
+                {nameError && (
+                  <p className="text-xs text-red-600 font-semibold mt-1.5 flex items-center gap-1 animate-fadeIn">
+                    <AlertTriangle className="w-3.5 h-3.5 text-red-500" />
+                    <span>{nameError}</span>
+                  </p>
+                )}
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -764,7 +798,12 @@ Escalate to the appropriate department when necessary, and clearly inform the ca
               {/* 2. System Prompt */}
               <div className="space-y-2 pt-4 border-t border-hairline">
                 <div className="flex items-center justify-between">
-                  <Label className="text-sm font-bold text-black">System Prompt</Label>
+                  <div className="flex items-center gap-2">
+                    <Label className="text-sm font-bold text-black">System Prompt <span className="text-red-500 font-bold">*</span></Label>
+                    <span className="text-[10px] text-amber-600 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-[6px] font-semibold italic normal-case flex items-center gap-1 shadow-sm shrink-0">
+                      Required Field
+                    </span>
+                  </div>
                   <button
                     type="button"
                     onClick={() => setIsPromptModalOpen(true)}
@@ -782,6 +821,12 @@ Escalate to the appropriate department when necessary, and clearly inform the ca
                   placeholder="Describe the agent's role, tasks, and conversation guidelines..."
                   className="min-h-[260px] bg-surface-soft border border-hairline rounded-[10px] p-3.5 text-xs font-mono text-neutral-800 leading-relaxed resize-y"
                 />
+                {systemPromptError && (
+                  <p className="text-xs text-red-600 font-semibold mt-1.5 flex items-center gap-1 animate-fadeIn">
+                    <AlertTriangle className="w-3.5 h-3.5 text-red-500" />
+                    <span>{systemPromptError}</span>
+                  </p>
+                )}
               </div>
 
               {/* 3. Whatsapp Summary Prompt */}
