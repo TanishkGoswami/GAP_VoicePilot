@@ -43,6 +43,8 @@ export const metadata: Metadata = {
 
 import { DemoModalProvider } from "@/components/demo/GetDemoContext";
 
+import MaintenanceGuard from "@/components/MaintenanceGuard";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -67,7 +69,9 @@ export default function RootLayout({
       </head>
       <body className={`${geist.className} ${geistMono.variable} ${arrayFont.variable} font-sans font-normal bg-white text-black min-h-screen antialiased`} suppressHydrationWarning>
         <DemoModalProvider>
-          {children}
+          <MaintenanceGuard productKey="voice_pilot">
+            {children}
+          </MaintenanceGuard>
         </DemoModalProvider>
       </body>
     </html>
