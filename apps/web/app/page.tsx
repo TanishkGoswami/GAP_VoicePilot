@@ -1047,7 +1047,9 @@ export default function HomePage() {
             </p>
           </div>
 
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          <div className={`grid gap-5 items-stretch mx-auto ${
+            plansList.length === 3 ? "max-w-6xl sm:grid-cols-3" : "sm:grid-cols-2 lg:grid-cols-4"
+          }`}>
             {plansList.map((plan) => (
               <article
                 key={plan.name}

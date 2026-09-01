@@ -493,7 +493,9 @@ export default function PricingPage() {
 
         {/* Pricing Cards Grid */}
         <section className="mx-auto max-w-[1340px] px-6 pb-24 lg:px-8">
-          <div className="grid gap-6 lg:grid-cols-4 items-stretch">
+          <div className={`grid gap-6 items-stretch mx-auto ${
+            plansList.length === 3 ? "max-w-5xl lg:grid-cols-3" : "lg:grid-cols-4"
+          }`}>
             {plansList.map((plan) => {
               const price = isAnnual ? plan.annualPrice : plan.monthlyPrice;
               return (
